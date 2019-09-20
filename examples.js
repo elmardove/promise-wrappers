@@ -1,40 +1,10 @@
+const DynamicPromise = require('./DynamicPromise');
+const InterruptibleDynamicPromise = require('./InterruptibleDynamicPromise');
+
 const one = true;
 const two = true;
 const tri = true;
 const interrupt = false;
-
-/**
- * DynamicPromise definition
- */
-class DynamicPromise {
-  constructor() { this.dynamicPromise = Promise.resolve(); }
-
-  addThen(fn) {
-    this.dynamicPromise = this.dynamicPromise.then(fn);
-    return this;
-  }
-
-  addThenIf(fn, condition) {
-    if (condition) this.addThen(fn);
-    return this;
-  }
-
-  addCatch(fn) {
-    this.dynamicPromise = this.dynamicPromise.catch(fn);
-    return this;
-  }
-
-  addCatchIf(fn, condition) {
-    if (condition) this.addCatch(fn);
-    return this;
-  }
-
-  then(fn) { return this.dynamicPromise.then(fn); }
-
-  catch(fn) { return this.dynamicPromise.catch(fn); }
-
-  toPromise() { return this.dynamicPromise; }
-}
 
 
 /**
@@ -45,6 +15,7 @@ if (one) dynamicPromise.addThen(() => console.log('ONE'));
 if (two) dynamicPromise.addThen(() => console.log('TWO'));
 if (tri) dynamicPromise.addThen(() => console.log('THREE'));
 
+
 /**
  * DynamicPromise usage with addThenIf
  */
@@ -53,25 +24,6 @@ new DynamicPromise()
     .addThenIf(() => console.log('TWO with addThenIf'), two)
     .addThenIf(() => console.log('THREE with addThenIf'), tri)
     .then(() => console.log('DynamicPromise unwrap Promise here'));
-
-
-/**
- * InterruptibleDynamicPromise definition
- */
-class InterruptibleDynamicPromise extends DynamicPromise {
-  constructor() {
-    super().continue = true;
-    this.flow = {};
-    this.flow.stop = this.stop.bind(this);
-  }
-
-  stop() { this.continue = false; }
-
-  addThen(fn) {
-    this.dynamicPromise = this.dynamicPromise.then(args => args || []).then(args => this.continue ? fn(this.flow, ...args) : false);
-    return this;
-  }
-}
 
 
 /**
